@@ -32,7 +32,6 @@ export interface RoleCounts {
 
 export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 20;
-export const MIN_CIVILIANS = 2;
 export const POINTS: Record<Role, number> = { civilian: 2, mrwhite: 6, undercover: 10 };
 
 export function shuffle<T>(items: readonly T[], rng: Rng = Math.random): T[] {
@@ -44,9 +43,9 @@ export function shuffle<T>(items: readonly T[], rng: Rng = Math.random): T[] {
   return result;
 }
 
-/** One civilian left is an infiltrator win, so civilians can only ever win starting from two. */
+/** Civilians must always outnumber the infiltrators at the start. */
 export function maxInfiltrators(playerCount: number): number {
-  return playerCount - MIN_CIVILIANS;
+  return Math.floor((playerCount - 1) / 2);
 }
 
 export function defaultRoleCounts(playerCount: number): RoleCounts {

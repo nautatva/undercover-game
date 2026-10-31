@@ -93,7 +93,7 @@ export function SetupScreen({
             onChange={(mrWhite) => setCounts({ ...counts, mrWhite })}
           />
           <Text style={styles.summary}>
-            {civilians} civilians share a word
+            {civilians} civilians share the main word
           </Text>
         </View>
 
