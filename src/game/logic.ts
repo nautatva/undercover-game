@@ -62,7 +62,7 @@ export function isValidRoleCounts(playerCount: number, { undercover, mrWhite }: 
     playerCount >= MIN_PLAYERS &&
     playerCount <= MAX_PLAYERS &&
     undercover >= 0 &&
-    (mrWhite === 0 || mrWhite === 1) &&
+    mrWhite >= 0 &&
     infiltrators >= 1 &&
     infiltrators <= maxInfiltrators(playerCount)
   );
@@ -175,7 +175,7 @@ export function isCorrectGuess(guess: string, civilianWord: string): boolean {
   return normalizeWord(guess) === normalizeWord(civilianWord);
 }
 
-/** A correct guess wins the game for Mr. White alone, even if others are still in play. */
+/** A correct guess wins the game for that Mr. White alone, even if others are still in play. */
 export function submitMrWhiteGuess(state: GameState, guess: string, rng: Rng = Math.random): GameState {
   if (isCorrectGuess(guess, state.civilianWord)) {
     return { ...state, winner: 'mrwhite', phase: 'gameover' };
@@ -183,18 +183,18 @@ export function submitMrWhiteGuess(state: GameState, guess: string, rng: Rng = M
   return continueOrFinish(state, rng);
 }
 
-function isOnWinningSide(role: Role, winner: Winner): boolean {
-  if (winner === 'civilians') return role === 'civilian';
-  if (winner === 'mrwhite') return role === 'mrwhite';
-  return role !== 'civilian';
+function isOnWinningSide(player: Player, state: GameState): boolean {
+  if (state.winner === 'civilians') return player.role === 'civilian';
+  // The Mr. White who just guessed is always the last player eliminated.
+  if (state.winner === 'mrwhite') return player.id === state.lastEliminatedId;
+  return state.winner === 'infiltrators' && player.role !== 'civilian';
 }
 
 /** Points earned this game by each player id. Eliminated teammates still share the win. */
 export function pointsForGame(state: GameState): Record<number, number> {
   const points: Record<number, number> = {};
   for (const player of state.players) {
-    points[player.id] =
-      state.winner && isOnWinningSide(player.role, state.winner) ? POINTS[player.role] : 0;
+    points[player.id] = isOnWinningSide(player, state) ? POINTS[player.role] : 0;
   }
   return points;
 }

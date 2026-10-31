@@ -36,10 +36,59 @@ test('default role counts are valid for every player count', () => {
   }
 });
 
-test('role counts need an infiltrator and at most one Mr. White', () => {
+test('role counts need an infiltrator and enough players', () => {
   assert.equal(isValidRoleCounts(3, { undercover: 0, mrWhite: 0 }), false);
-  assert.equal(isValidRoleCounts(9, { undercover: 1, mrWhite: 2 }), false);
   assert.equal(isValidRoleCounts(2, { undercover: 1, mrWhite: 0 }), false);
+  assert.equal(isValidRoleCounts(5, { undercover: -1, mrWhite: 2 }), false);
+  assert.equal(isValidRoleCounts(5, { undercover: 2, mrWhite: -1 }), false);
+});
+
+test('Mr. Whites and Undercovers share one limit, with any mix allowed', () => {
+  for (let n = MIN_PLAYERS; n <= MAX_PLAYERS; n++) {
+    const limit = n - 2;
+    for (let mrWhite = 0; mrWhite <= limit; mrWhite++) {
+      const undercover = limit - mrWhite;
+      assert.ok(isValidRoleCounts(n, { undercover, mrWhite }), `n=${n} w=${mrWhite}`);
+      assert.equal(
+        isValidRoleCounts(n, { undercover: undercover + 1, mrWhite }),
+        false,
+        `n=${n} w=${mrWhite}`,
+      );
+    }
+  }
+});
+
+test('several Mr. Whites all get no word and none of them speaks first', () => {
+  const game = createGame(names(6), { undercover: 1, mrWhite: 3 }, pair);
+  const whites = idsOf(game, 'mrwhite');
+  assert.equal(whites.length, 3);
+  for (const id of whites) assert.equal(game.players[id].word, null);
+  for (let i = 0; i < 200; i++) {
+    assert.equal(whites.includes(buildSpeakingOrder(game.players)[0]), false);
+  }
+});
+
+test('with several Mr. Whites, only the one who guesses correctly wins', () => {
+  const game = createGame(names(6), { undercover: 0, mrWhite: 3 }, pair);
+  const [guesser, ...others] = idsOf(game, 'mrwhite');
+  const won = submitMrWhiteGuess(eliminate(game, guesser), game.civilianWord);
+  assert.equal(won.winner, 'mrwhite');
+  const points = pointsForGame(won);
+  assert.equal(points[guesser], 6);
+  for (const id of others) assert.equal(points[id], 0);
+});
+
+test('civilians must catch every Mr. White, each getting their own guess', () => {
+  let state = createGame(names(6), { undercover: 0, mrWhite: 3 }, pair);
+  const whites = idsOf(state, 'mrwhite');
+  for (const id of whites.slice(0, -1)) {
+    state = eliminate(state, id);
+    assert.equal(state.phase, 'mrwhite');
+    state = submitMrWhiteGuess(state, 'nonsense');
+    assert.equal(state.phase, 'discuss');
+  }
+  state = submitMrWhiteGuess(eliminate(state, whites[whites.length - 1]), 'nonsense');
+  assert.equal(state.winner, 'civilians');
 });
 
 test('infiltrators are only limited by leaving two civilians', () => {

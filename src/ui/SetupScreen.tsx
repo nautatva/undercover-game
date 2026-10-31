@@ -89,7 +89,7 @@ export function SetupScreen({
             hint="No word at all"
             value={counts.mrWhite}
             min={counts.undercover === 0 ? 1 : 0}
-            max={Math.min(1, maxTotal - counts.undercover)}
+            max={maxTotal - counts.undercover}
             onChange={(mrWhite) => setCounts({ ...counts, mrWhite })}
           />
           <Text style={styles.summary}>

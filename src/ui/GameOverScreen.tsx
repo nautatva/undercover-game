@@ -3,11 +3,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { type GameState, pointsForGame, type Winner } from '../game/logic';
 import { Button, colors, Eyebrow, PopIn, ROLE_INFO, Screen, Title } from './kit';
 
-const WINNER_TITLES: Record<Winner, string> = {
-  civilians: 'Civilians win',
-  infiltrators: 'The impostors win',
-  mrwhite: 'Mr. White wins alone',
-};
+function winnerTitle(game: GameState, winner: Winner): string {
+  if (winner === 'civilians') return 'Civilians win';
+  if (winner === 'infiltrators') return 'The impostors win';
+  const guesser = game.players.find((p) => p.id === game.lastEliminatedId);
+  return `${guesser?.name ?? 'Mr. White'} wins alone`;
+}
 
 export function GameOverScreen({
   game,
@@ -34,7 +35,7 @@ export function GameOverScreen({
     >
       <Eyebrow>Game over</Eyebrow>
       <PopIn>
-        <Title>{game.winner ? WINNER_TITLES[game.winner] : 'Game over'}</Title>
+        <Title>{game.winner ? winnerTitle(game, game.winner) : 'Game over'}</Title>
       </PopIn>
 
       <View style={styles.words}>
