@@ -1,13 +1,15 @@
 {
   "expo": {
-    "name": "undercover",
+    "name": "Undercover",
     "slug": "undercover",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.local.undercover",
+      "appleTeamId": "38MQ3RYJ8T"
     },
     "android": {
       "adaptiveIcon": {
@@ -16,10 +18,12 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.local.undercover"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "backgroundColor": "#12101A"
   }
 }
